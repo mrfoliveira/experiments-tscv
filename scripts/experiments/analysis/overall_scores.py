@@ -131,4 +131,7 @@ pd.set_option('display.max_rows', 30)
 cv_df = pd.DataFrame(cv_scores)
 cv_df.groupby('Method').mean(numeric_only=True)
 
-print(cv_df.groupby('Method').mean(numeric_only=True).round(3))
+cv_df_summ = cv_df.groupby('Method').mean(numeric_only=True).round(3)
+print(cv_df_summ.to_latex(caption='---', label='tab:overall'))
+
+print(cv_df_summ)
