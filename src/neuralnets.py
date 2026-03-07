@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Optional, List, Union
 import hashlib
 import json
@@ -44,14 +45,14 @@ class BaseModelsConfig:
     AUTO_MODEL_CLASSES = {
         'AutoTFT': AutoTFT,
         'AutoNBEATS': AutoNBEATS,
-        # 'AutoTiDE': AutoTiDE,
-        # 'AutoNLinear': AutoNLinear,
-        # 'AutoKAN': AutoKAN,
-        # 'AutoMLP': AutoMLP,
-        # 'AutoDLinear': AutoDLinear,
-        # 'AutoNHITS': AutoNHITS,
-        # 'AutoDeepNPTS': AutoDeepNPTS,
-        # 'AutoPatchTST': AutoPatchTST,
+        'AutoTiDE': AutoTiDE,
+        'AutoNLinear': AutoNLinear,
+        'AutoKAN': AutoKAN,
+        'AutoMLP': AutoMLP,
+        'AutoDLinear': AutoDLinear,
+        'AutoNHITS': AutoNHITS,
+        'AutoDeepNPTS': AutoDeepNPTS,
+        'AutoPatchTST': AutoPatchTST,
 
         # 'AutoGRU': AutoGRU,
         # 'AutoDeepAR': AutoDeepAR,
@@ -141,10 +142,17 @@ class BaseModelsConfig:
                                          n_samples=n_samples)
 
             for i, conf_ in enumerate(configs):
+                pprint(conf_)
                 conf_['h'] = horizon
                 conf_.pop('loss')
                 if 'input_size' not in conf_.keys():
                     conf_['input_size'] = input_size
+
+                    if 'input_size_multiplier' in conf_.keys():
+                        # conf_['input_size'] = conf_['input_size_multiplier'] * input_size
+                        conf_['input_size'] = 1 * input_size
+                        conf_.pop('input_size_multiplier')
+
 
                 mod_name_ = cls.MODEL_CLASSES.get(mod_name).__name__
 

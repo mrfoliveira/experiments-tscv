@@ -1,4 +1,4 @@
-DRY_RUN = False
+DRY_RUN = True
 
 N_FOLDS = 5
 SEED = 123
@@ -6,7 +6,7 @@ HOLDOUT_TR = 0.7
 MC_TR = 0.5
 MC_TS = 0.2
 KFOLD_N_REPEATS = 2
-TRY_MPS = True
+TRY_MPS = False
 STEP_SIZE = 1
 OUT_SET_MULTIPLIER = 1
 if DRY_RUN:

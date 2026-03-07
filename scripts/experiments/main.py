@@ -2,7 +2,7 @@ import os
 import warnings
 from pathlib import Path
 
-from src.neuralnets_auto import ModelsConfig
+from src.neuralnets import BaseModelsConfig
 from src.cv import CV_METHODS
 from src.cv.tw_holdout import time_wise_holdout
 from src.loaders import ChronosDataset, LongHorizonDatasetR
@@ -14,11 +14,10 @@ warnings.filterwarnings('ignore')
 os.environ['TUNE_DISABLE_STRICT_METRIC_CHECKING'] = '1'
 
 # ---- data loading and partitioning
-target = 'ECL'
-# target = 'monash_hospital'
-# df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
-df, horizon, _, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
-
+# target = 'ECL'
+target = 'monash_m1_monthly'
+df, horizon, n_lags, freq, seas_len = ChronosDataset.load_everything(target)
+# df, horizon, n_lags, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
 
 # df['unique_id'].value_counts().value_counts().sort_index()
 # from pprint import pprint
@@ -37,10 +36,11 @@ in_set, out_set = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIE
 if __name__ == '__main__':
     print(results_dir.absolute())
 
-    models = ModelsConfig.get_auto_nf_models(horizon=horizon,
-                                             try_mps=TRY_MPS,
-                                             limit_epochs=LIMIT_EPOCHS,
-                                             n_samples=N_SAMPLES)
+    models = BaseModelsConfig.get_pseudo_auto_nf_models(horizon=horizon,
+                                                        input_size=n_lags,
+                                                        try_mps=TRY_MPS,
+                                                        limit_epochs=LIMIT_EPOCHS,
+                                                        n_samples=N_SAMPLES, )
 
     print(f"Running cross validation for method: Time-wise Holdout")
     tw_cv, tw_cv_inner = time_wise_holdout(in_set=in_set,
