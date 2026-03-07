@@ -10,7 +10,7 @@ from statsforecast.models import SeasonalNaive
 from src.neuralnets import ModelsConfig
 from src.cv import CV_METHODS, CV_METHODS_PARAMS
 from src.neuralforecast_ext import NeuralForecast2
-from src.chronos_data import ChronosDataset
+from src.loaders.base import DatasetLoader
 from src.config import STEP_SIZE
 
 
@@ -80,7 +80,7 @@ def run_cross_validation(in_set: pd.DataFrame,
 
     optim_models = ModelsConfig.get_best_configs(cv_folds_config_scores)
 
-    complete_df = ChronosDataset.concat_time_wise_tr_ts(in_set, out_set)
+    complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set, out_set)
 
     nf_outer_setup = {
         'df': complete_df, 'val_size': horizon,

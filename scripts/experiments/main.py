@@ -5,7 +5,7 @@ from pathlib import Path
 from src.neuralnets import ModelsConfig
 from src.cv import CV_METHODS
 from src.cv.tw_holdout import time_wise_holdout
-from src.chronos_data import ChronosDataset
+from src.loaders import ChronosDataset, LongHorizonDatasetR
 from src.workflow import run_cross_validation
 from src.config import N_SAMPLES, SEED, LIMIT_EPOCHS, TRY_MPS, OUT_SET_MULTIPLIER
 
@@ -14,9 +14,12 @@ warnings.filterwarnings('ignore')
 os.environ['TUNE_DISABLE_STRICT_METRIC_CHECKING'] = '1'
 
 # ---- data loading and partitioning
-target = 'm4_daily'
+target = 'ECL'
 # target = 'monash_hospital'
-df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
+# df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
+df, horizon, _, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
+
+
 # df['unique_id'].value_counts().value_counts().sort_index()
 # from pprint import pprint
 # dt = ChronosDataset.get_chronos_datasets_names()
