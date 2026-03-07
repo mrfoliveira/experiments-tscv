@@ -53,9 +53,6 @@ class BaseModelsConfig:
         # 'AutoDeepNPTS': AutoDeepNPTS,
         # 'AutoPatchTST': AutoPatchTST,
 
-
-
-
         # 'AutoGRU': AutoGRU,
         # 'AutoDeepAR': AutoDeepAR,
         # 'AutoLSTM': AutoLSTM,
@@ -118,7 +115,7 @@ class BaseModelsConfig:
                                            n_samples=10,
                                            try_mps=True)
 
-                                           
+
         """
 
         models = []
@@ -143,14 +140,17 @@ class BaseModelsConfig:
                                          horizon=horizon,
                                          n_samples=n_samples)
 
-            for conf_ in configs:
+            for i, conf_ in enumerate(configs):
                 conf_['h'] = horizon
                 conf_.pop('loss')
                 if 'input_size' not in conf_.keys():
                     conf_['input_size'] = input_size
 
+                mod_name_ = cls.MODEL_CLASSES.get(mod_name).__name__
+
                 model_inst = cls.MODEL_CLASSES.get(mod_name)(
-                    **conf_
+                    **conf_,
+                    alias=f'{mod_name_}_{i}'
                 )
 
                 # model_instance = mod(
@@ -182,8 +182,3 @@ class BaseModelsConfig:
             samples.append(spec["config"])
 
         return samples
-
-
-
-
-
