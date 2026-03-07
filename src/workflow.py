@@ -7,7 +7,7 @@ from neuralforecast import NeuralForecast
 from statsforecast import StatsForecast
 from statsforecast.models import SeasonalNaive
 
-from src.neuralnets import ModelsConfig
+from src.neuralnets import BaseModelsConfig
 from src.cv import CV_METHODS, CV_METHODS_PARAMS
 from src.neuralforecast_ext import NeuralForecast2
 from src.loaders.base import DatasetLoader

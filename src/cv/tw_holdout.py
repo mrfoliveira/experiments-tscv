@@ -7,8 +7,8 @@ from neuralforecast import NeuralForecast
 from statsforecast import StatsForecast
 from statsforecast.models import SeasonalNaive
 
-from src.neuralnets import ModelsConfig
-from src.chronos_data import ChronosDataset
+from src.neuralnets_auto import ModelsConfig
+from src.loaders.base import DatasetLoader
 from src.config import SEED, STEP_SIZE
 
 
@@ -46,7 +46,7 @@ def time_wise_holdout(in_set: pd.DataFrame,
 
     nf_final = NeuralForecast(models=optim_models, freq=freq)
 
-    complete_df = ChronosDataset.concat_time_wise_tr_ts(in_set, out_set)
+    complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set, out_set)
 
     nf_outer_setup = {
         'df': complete_df, 'val_size': horizon,

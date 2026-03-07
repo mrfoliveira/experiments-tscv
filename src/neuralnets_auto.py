@@ -21,7 +21,6 @@ from neuralforecast.auto import (AutoGRU,
                                  AutoDeepAR,
                                  AutoTCN,
                                  AutoDilatedRNN)
-from ray.tune.search.variant_generator import generate_variants
 
 from neuralforecast.models import (GRU,
                                    KAN,
@@ -40,21 +39,18 @@ from neuralforecast.models import (GRU,
                                    DilatedRNN)
 
 
-class BaseModelsConfig:
+class ModelsConfig:
     AUTO_MODEL_CLASSES = {
         'AutoTFT': AutoTFT,
         'AutoNBEATS': AutoNBEATS,
-        # 'AutoTiDE': AutoTiDE,
-        # 'AutoNLinear': AutoNLinear,
-        # 'AutoKAN': AutoKAN,
-        # 'AutoMLP': AutoMLP,
-        # 'AutoDLinear': AutoDLinear,
-        # 'AutoNHITS': AutoNHITS,
-        # 'AutoDeepNPTS': AutoDeepNPTS,
-        # 'AutoPatchTST': AutoPatchTST,
-
-
-
+        'AutoTiDE': AutoTiDE,
+        'AutoNLinear': AutoNLinear,
+        'AutoKAN': AutoKAN,
+        'AutoMLP': AutoMLP,
+        'AutoDLinear': AutoDLinear,
+        'AutoNHITS': AutoNHITS,
+        'AutoDeepNPTS': AutoDeepNPTS,
+        'AutoPatchTST': AutoPatchTST,
 
         # 'AutoGRU': AutoGRU,
         # 'AutoDeepAR': AutoDeepAR,
@@ -83,7 +79,7 @@ class BaseModelsConfig:
 
     NEED_CPU = ['AutoGRU',
                 'AutoDeepNPTS',
-                # 'AutoTFT',
+                #'AutoTFT',
                 'AutoPatchTST',
                 'AutoDeepAR',
                 'AutoLSTM',
@@ -94,36 +90,15 @@ class BaseModelsConfig:
                 'AutoTCN']
 
     @classmethod
-    def get_pseudo_auto_nf_models(cls,
-                                  horizon: int,
-                                  input_size: int,
-                                  n_samples: int,
-                                  try_mps: bool = True,
-                                  limit_epochs: bool = False,
-                                  limit_val_batches: Optional[int] = None):
-        """
-
-        :param horizon:
-        :param input_size:
-        :param n_samples:
-        :param try_mps:
-        :param limit_epochs:
-        :param limit_val_batches:
-        :return:
-
-        example:
-
-        BaseModelsConfig.get_pseudo_auto_nf_models(horizon=12,
-                                           input_size=12,
-                                           n_samples=10,
-                                           try_mps=True)
-
-                                           
-        """
+    def get_auto_nf_models(cls,
+                           horizon: int,
+                           n_samples: int,
+                           try_mps: bool = True,
+                           limit_epochs: bool = False,
+                           limit_val_batches: Optional[int] = None):
 
         models = []
         for mod_name, mod in cls.AUTO_MODEL_CLASSES.items():
-
             if try_mps:
                 if mod_name in cls.NEED_CPU:
                     mod.default_config['accelerator'] = 'cpu'
@@ -138,52 +113,77 @@ class BaseModelsConfig:
             if limit_val_batches is not None:
                 mod.default_config['limit_val_batches'] = limit_val_batches
 
-            configs = cls.sample_configs(model_name='',
-                                         config=mod.default_config,
-                                         horizon=horizon,
-                                         n_samples=n_samples)
+            model_instance = mod(
+                h=horizon,
+                num_samples=n_samples,
+                alias=mod_name,
+                valid_loss=MAE(),
+                refit_with_val=True,
+            )
 
-            for conf_ in configs:
-                conf_['h'] = horizon
-                conf_.pop('loss')
-                if 'input_size' not in conf_.keys():
-                    conf_['input_size'] = input_size
-
-                model_inst = cls.MODEL_CLASSES.get(mod_name)(
-                    **conf_
-                )
-
-                # model_instance = mod(
-                #     h=horizon,
-                #     num_samples=n_samples,
-                #     alias=mod_name,
-                #     valid_loss=MAE(),
-                #     refit_with_val=True,
-                # )
-
-                models.append(model_inst)
+            models.append(model_instance)
 
         return models
 
+    @staticmethod
+    def get_all_config_results(nf: NeuralForecast):
+
+        scores = []
+        for mod in nf.models:
+            print(f"Model: {mod.alias}")
+            for i, res in enumerate(mod.results):
+                print(res)
+                res.config['learning_rate'] = np.round(res.config['learning_rate'], 5)
+
+                conf_str = {k: str(v) for k, v in res.config.items()}
+                sorted_string = json.dumps(conf_str, sort_keys=True)
+                hash_value = hashlib.md5(sorted_string.encode()).hexdigest()
+
+                try:
+                    scr = {
+                        'model': mod.alias,
+                        'config_idx': i,
+                        'loss': res.metrics['loss'],
+                        'config': res.config,
+                        'hash_value': hash_value
+                    }
+
+                    scores.append(scr)
+                except KeyError:
+                    continue
+
+        return scores
+
     @classmethod
-    def sample_configs(cls, model_name: str, horizon: int, n_samples: int = 10, config: Optional[None] = None):
-        # BaseModelsConfig.sample_configs('AutoTFT', horizon=2, n_samples=5)
+    def _get_best_configs_from_folds(cls, fold_scores: List) -> List:
+        folds_fl = [item for sublist in fold_scores for item in sublist]
 
-        if config is None:
-            config_pool = cls.AUTO_MODEL_CLASSES.get(model_name).get_default_config(h=horizon, backend='ray')
-        else:
-            config_pool = config
+        folds_df = pd.DataFrame(folds_fl)
 
-        samples = []
-        # For a random search space, generate_variants yields once per call; use different seeds
-        for seed in range(n_samples):
-            gen = generate_variants({"config": config_pool}, random_state=seed)
-            resolved_vars, spec = next(gen)
-            samples.append(spec["config"])
+        folds_avg = folds_df.groupby(['model', 'hash_value']).mean(numeric_only=True)
 
-        return samples
+        best_configs = folds_avg.loc[folds_avg.groupby('model')['loss'].idxmin()].reset_index()
 
+        optim_models = []
+        for idx, row in best_configs.iterrows():
+            config_inst = folds_df.query("model == @row['model'] and hash_value == @row['hash_value']")
+            config = config_inst.iloc[0]['config']
 
+            opm_mod = cls.MODEL_CLASSES[row['model']](**config)
 
+            optim_models.append(opm_mod)
 
+        return optim_models
 
+    @classmethod
+    def get_best_configs(cls, nf: Union[NeuralForecast, List]) -> List:
+        if isinstance(nf, List):
+            return cls._get_best_configs_from_folds(nf)
+
+        optim_models = []
+        for mod in nf.models:
+            opm_mod = cls.MODEL_CLASSES[mod.alias](**mod.results.get_best_result().config)
+
+            optim_models.append(opm_mod)
+
+        return optim_models
