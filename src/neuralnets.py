@@ -7,38 +7,28 @@ import numpy as np
 import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.losses.pytorch import MAE
-from neuralforecast.auto import (AutoGRU,
-                                 AutoNBEATS,
+from neuralforecast.auto import (AutoNBEATS,
                                  AutoTiDE,
                                  AutoNLinear,
                                  AutoKAN,
                                  AutoMLP,
-                                 AutoLSTM,
                                  AutoDLinear,
                                  AutoNHITS,
                                  AutoPatchTST,
                                  AutoTFT,
-                                 AutoDeepNPTS,
-                                 AutoDeepAR,
-                                 AutoTCN,
-                                 AutoDilatedRNN)
+                                 AutoDeepNPTS)
 from ray.tune.search.variant_generator import generate_variants
 
-from neuralforecast.models import (GRU,
-                                   KAN,
+from neuralforecast.models import (KAN,
                                    NBEATS,
                                    TiDE,
                                    NLinear,
                                    MLP,
-                                   LSTM,
                                    DLinear,
-                                   NHITS, DeepAR,
+                                   NHITS,
                                    PatchTST,
                                    TFT,
-                                   DeepNPTS,
-                                   DeepAR,
-                                   TCN,
-                                   DilatedRNN)
+                                   DeepNPTS)
 
 
 class BaseModelsConfig:
@@ -72,24 +62,16 @@ class BaseModelsConfig:
         'AutoNLinear': NLinear,
         'AutoTFT': TFT,
         'AutoPatchTST': PatchTST,
-        'AutoGRU': GRU,
-        'AutoDeepAR': DeepAR,
-        'AutoLSTM': LSTM,
-        'AutoDilatedRNN': DilatedRNN,
-        'AutoTCN': TCN,
     }
 
-    NEED_CPU = ['AutoGRU',
-                'AutoDeepNPTS',
-                # 'AutoTFT',
-                'AutoPatchTST',
-                'AutoDeepAR',
-                'AutoLSTM',
-                'AutoTiDE',
-                'AutoNLinear',
-                'AutoKAN',
-                'AutoDilatedRNN',
-                'AutoTCN']
+    NEED_CPU = [
+        # 'AutoDeepNPTS',
+        # 'AutoTFT',
+        # 'AutoPatchTST',
+        # 'AutoTiDE',
+        # 'AutoNLinear',
+        # 'AutoKAN'
+    ]
 
     @classmethod
     def get_pseudo_auto_nf_models(cls,
@@ -153,6 +135,8 @@ class BaseModelsConfig:
                         conf_['input_size'] = 1 * input_size
                         conf_.pop('input_size_multiplier')
 
+                if conf_['scaler_type'] == 'robust':
+                    conf_['scaler_type'] = 'standard'
 
                 mod_name_ = cls.MODEL_CLASSES.get(mod_name).__name__
 
