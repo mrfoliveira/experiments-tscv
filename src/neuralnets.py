@@ -5,6 +5,8 @@ import json
 
 import numpy as np
 import pandas as pd
+from utilsforecast.evaluation import evaluate
+from utilsforecast.losses import mae
 from neuralforecast import NeuralForecast
 from neuralforecast.losses.pytorch import MAE
 from neuralforecast.auto import (AutoNBEATS,
@@ -174,3 +176,15 @@ class BaseModelsConfig:
             samples.append(spec["config"])
 
         return samples
+
+    @staticmethod
+    def best_validation_variants(cv: pd.DataFrame, model_names: List[str]):
+        err = evaluate(df=cv, models=model_names, metrics=[mae])
+        mean_err = err.mean(numeric_only=True)[model_names]
+
+        best_variants = (
+            mean_err.groupby(mean_err.index.str.split("_").str[0]).idxmin().tolist()
+        )
+
+        return best_variants
+

@@ -9,6 +9,7 @@ from statsforecast.models import SeasonalNaive
 
 from src.cv import CV_METHODS, CV_METHODS_PARAMS
 from src.neuralforecast_ext import NeuralForecast2
+from src.neuralnets import BaseModelsConfig
 from src.loaders.base import DatasetLoader
 from src.config import STEP_SIZE
 
@@ -24,9 +25,11 @@ def run_cross_validation(in_set: pd.DataFrame,
                          out_set_multiplier: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
     cv = CV_METHODS[cv_method](**CV_METHODS_PARAMS[cv_method])
 
+    aliases = [mod.alias for mod in nf_models]
+
     uids = in_set['unique_id'].unique()
 
-    cv_results, cv_folds_config_scores = [], []
+    cv_results = []
     for j, (train_index, test_index) in enumerate(cv.split(uids)):
         print(f"Fold {j}:")
         print(f"  Train: index={train_index}")
@@ -74,6 +77,8 @@ def run_cross_validation(in_set: pd.DataFrame,
         ))
     )
 
+    best_configs = BaseModelsConfig.best_validation_variants(cv_inner, aliases)
+
     complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set, out_set)
 
     nf_outer_setup = {
@@ -89,7 +94,8 @@ def run_cross_validation(in_set: pd.DataFrame,
     }
 
     models_f = copy.deepcopy(nf_models)
-    nf_final = NeuralForecast(models=models_f, freq=freq)
+    models_fb = [mod for mod in models_f if mod.alias in best_configs]
+    nf_final = NeuralForecast(models=models_fb, freq=freq)
     cv_nf_f = nf_final.cross_validation(**nf_outer_setup)
 
     sf = StatsForecast(models=[SeasonalNaive(season_length=freq_int)], freq=freq)
