@@ -8,7 +8,10 @@ from src.loaders import ChronosDataset, LongHorizonDatasetR
 from src.mase import mase_scaling_factor
 from src.config import OUT_SET_MULTIPLIER
 from src.cv import CV_METHODS
-from src.utils import rename_uids
+from src.utils import (rename_uids,
+                       to_latex_tab,
+                       METHOD_NAME_MAPPING,
+                       DATA_NAME_MAPPING)
 
 RESULTS_DIR = "assets/results"
 
@@ -136,9 +139,17 @@ cv_pivot = cv_df.reset_index().pivot(index='Dataset', columns='Method', values='
 cv_pivot_ext = cv_pivot.copy()
 cv_pivot_ext.loc['Avg. Rank'] = cv_pivot.rank(axis=1).mean()
 cv_pivot_ext.loc['Avg'] = cv_pivot.mean()
+cv_pivot_ext.loc['Top 2 Count'] = (cv_pivot.rank(axis=1) < 3).sum().astype(int)
 
-print(cv_pivot_ext.round(3))
-print(cv_pivot_ext.round(3).astype(str).to_latex(caption='xxxx', label='tab:2'))
+cv_pivot_ext=cv_pivot_ext.rename(columns=METHOD_NAME_MAPPING, index=DATA_NAME_MAPPING)
+cv_pivot_ext.columns.name='Methods'
+cv_pivot_ext.index.name='Dataset'
 
-print(cv_df.groupby('Method').mean(numeric_only=True))
-print(cv_df.groupby('Method').mean(numeric_only=True).to_latex(caption='xxxx', label='tab:2'))
+print(to_latex_tab(cv_pivot_ext, round_to_n=3,rotate_cols=False))
+
+#
+# print(cv_pivot_ext.round(3))
+# print(cv_pivot_ext.round(3).astype(str).to_latex(caption='xxxx', label='tab:2'))
+#
+# print(cv_df.groupby('Method').mean(numeric_only=True))
+# print(cv_df.groupby('Method').mean(numeric_only=True).to_latex(caption='xxxx', label='tab:2'))
