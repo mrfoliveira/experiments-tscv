@@ -8,7 +8,10 @@ from src.loaders import ChronosDataset, LongHorizonDatasetR
 from src.mase import mase_scaling_factor
 from src.config import OUT_SET_MULTIPLIER
 from src.cv import CV_METHODS
-from src.utils import rename_uids
+from src.utils import (rename_uids,
+                       to_latex_tab,
+                       METHOD_NAME_MAPPING,
+                       DATA_NAME_MAPPING)
 
 RESULTS_DIR = "assets/results"
 
@@ -22,10 +25,6 @@ MODELS = ["KAN", 'PatchTST', 'NBEATS', 'TFT',
 cv_scores = []
 for ds in dataset_names:
     print(ds)
-    # if ds not in ['TrafficL']:
-    #     continue
-    if ds in ['Weather','monash_tourism_quarterly','monash_tourism_monthly']:
-        continue
 
     if ds in [*LongHorizonDatasetR.FREQUENCY_MAP]:
         df, horizon, _, _, seas_len = LongHorizonDatasetR.load_everything(ds)
@@ -52,10 +51,6 @@ for ds in dataset_names:
                                  for col in cv_inner.columns if col.startswith('Auto')},
                         inplace=True)
         cv_outer = pd.read_csv(outer_path)
-
-        # cv_outer.rename(columns={col: col.replace('Auto', '', 1)
-        #                          for col in cv_outer.columns if col.startswith('Auto')},
-        #                 inplace=True)
 
         radar_outer = ModelRadar(
             cv_df=cv_outer,
@@ -109,10 +104,6 @@ for ds in dataset_names:
         selected_model = err_inner.idxmin()
         best_model = err_outer.idxmin()
 
-        if pd.isna(selected_model):
-            selected_model = 'MLP'
-            best_model = 'MLP'
-
         scr = {
             'Method': method,
             'Dataset': ds,
@@ -134,8 +125,17 @@ cv_df['outer_regret'] = cv_df['selected_error'] - cv_df['best_error']
 cv_pivot = cv_df.reset_index().pivot(index='Dataset', columns='Method', values='selected_error')
 
 cv_pivot_ext = cv_pivot.copy()
+
 cv_pivot_ext.loc['Avg. Rank'] = cv_pivot.rank(axis=1).mean()
 cv_pivot_ext.loc['Avg'] = cv_pivot.mean()
+cv_pivot_ext.loc['Top 2 Count'] = (cv_pivot.rank(axis=1) < 3).sum().astype(int)
+
+cv_pivot_ext=cv_pivot_ext.rename(columns=METHOD_NAME_MAPPING, index=DATA_NAME_MAPPING)
+cv_pivot_ext.columns.name='Methods'
+cv_pivot_ext.index.name='Dataset'
+
+print(to_latex_tab(cv_pivot_ext, round_to_n=3,rotate_cols=False))
+
 
 print(cv_pivot_ext.round(3))
 print(cv_pivot_ext.round(3).astype(str).to_latex(caption='xxxx', label='tab:2'))

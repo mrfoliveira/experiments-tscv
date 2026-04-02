@@ -165,3 +165,4 @@ lightning_logs/
 
 # Custom
 scripts/_dev/
+assets/datasets
