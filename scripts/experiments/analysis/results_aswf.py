@@ -27,13 +27,16 @@ for ds in dataset_names:
     print(ds)
     # if ds not in ['TrafficL']:
     #     continue
-    if ds in ['Weather','monash_tourism_quarterly','monash_tourism_monthly']:
+    if ds in ['monash_tourism_quarterly','monash_tourism_monthly']:
         continue
 
     if ds in [*LongHorizonDatasetR.FREQUENCY_MAP]:
         df, horizon, _, _, seas_len = LongHorizonDatasetR.load_everything(ds)
     else:
         df, horizon, _, _, seas_len = ChronosDataset.load_everything(ds)
+
+    if ds == 'Weather':
+        seas_len = 7
 
     in_set, _ = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
     mase_sf = mase_scaling_factor(seasonality=seas_len, train_df=in_set)
@@ -144,6 +147,8 @@ cv_pivot_ext.loc['Top 2 Count'] = (cv_pivot.rank(axis=1) < 3).sum().astype(int)
 cv_pivot_ext=cv_pivot_ext.rename(columns=METHOD_NAME_MAPPING, index=DATA_NAME_MAPPING)
 cv_pivot_ext.columns.name='Methods'
 cv_pivot_ext.index.name='Dataset'
+
+print(cv_pivot_ext)
 
 print(to_latex_tab(cv_pivot_ext, round_to_n=3,rotate_cols=False))
 

@@ -24,10 +24,12 @@ MODELS = ["KAN", 'PatchTST', 'NBEATS', 'TFT',
           "SeasonalNaive"]
 FOLD_BASED_ERROR = False
 
+# todo não devia calcular o inner mase com in_in_set?
+
 cv_scores = []
 for ds in dataset_names:
     print(ds)
-    if ds in ['Weather', 'monash_tourism_quarterly', 'monash_tourism_monthly']:
+    if ds in ['monash_tourism_quarterly', 'monash_tourism_monthly']:
         continue
 
     if ds in [*LongHorizonDatasetR.FREQUENCY_MAP]:
@@ -35,12 +37,16 @@ for ds in dataset_names:
     else:
         df, horizon, _, _, seas_len = ChronosDataset.load_everything(ds)
 
+    if ds == 'Weather':
+        seas_len = 1
+
     in_set, _ = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
     mase_sf = mase_scaling_factor(seasonality=seas_len, train_df=in_set)
 
     cv_methods = [*CV_METHODS] + ['TimeHoldout']
 
     for method in cv_methods:
+        print(method)
         # method = 'Holdout'
 
         inner_path = os.path.join(RESULTS_DIR, f"{ds},{method},inner.csv")
@@ -142,4 +148,5 @@ cv_df.groupby('Method').mean(numeric_only=True)
 
 cv_df_summ = cv_df.groupby('Method').mean(numeric_only=True).round(3)
 cv_df_summ = cv_df_summ.rename(index=METHOD_NAME_MAPPING)
+print(cv_df_summ)
 print(to_latex_tab(cv_df_summ.T, round_to_n=3, rotate_cols=False))
