@@ -19,13 +19,9 @@ warnings.filterwarnings('ignore')
 os.environ['TUNE_DISABLE_STRICT_METRIC_CHECKING'] = '1'
 
 # ---- data loading and partitioning
-# "ETTm1": 96,
-#         "ETTm2": 96,
-#         "TrafficL": 96,
-target = 'TrafficL'
-# target = 'monash_hospital'
-# df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
-df, horizon, _, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
+target = 'monash_hospital'
+df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
+# df, horizon, _, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
 
 # df['unique_id'].value_counts().value_counts().sort_index()
 # from pprint import pprint
@@ -39,13 +35,14 @@ RESULTS_PATH = '../../assets/results{}'
 # -- estimation_train is used for inner cv and final training
 # ----- the data we use to get performance estimations
 # -- estimation_test is only used at the end to see how well our estimation worked
-in_set, out_set = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
+in_set_all, out_set = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
 
 if HOLDOUT_FOR_OUTSET > 0:
     path_ = RESULTS_PATH.format('_holdout')
-    in_set = ChronosDataset.sample_uids(in_set, 1 - HOLDOUT_FOR_OUTSET)
+    in_set = ChronosDataset.sample_uids(in_set_all, 1 - HOLDOUT_FOR_OUTSET)
 else:
     path_ = RESULTS_PATH.format('')
+    in_set = in_set_all.copy()
 
 results_dir = Path(path_)
 
@@ -59,6 +56,7 @@ if __name__ == '__main__':
 
     print(f"Running cross validation for method: Time-wise Holdout")
     tw_cv, tw_cv_inner = time_wise_holdout(in_set=in_set,
+                                           in_set_all=in_set_all,
                                            out_set=out_set,
                                            freq=freq,
                                            freq_int=seas_len,
@@ -73,6 +71,7 @@ if __name__ == '__main__':
         print(f"Running cross validation for method: {method_name}")
         cv_result, cv_inner_result = run_cross_validation(cv_method=method_name,
                                                           in_set=in_set,
+                                                          in_set_all=in_set_all,
                                                           out_set=out_set,
                                                           freq=freq,
                                                           freq_int=seas_len,

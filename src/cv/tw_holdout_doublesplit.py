@@ -13,6 +13,7 @@ from src.config import SEED, STEP_SIZE
 
 
 def time_wise_holdout(in_set: pd.DataFrame,
+                      in_set_all: pd.DataFrame,
                       out_set: pd.DataFrame,
                       models: List,
                       freq: str,
@@ -46,7 +47,7 @@ def time_wise_holdout(in_set: pd.DataFrame,
 
     nf_final = NeuralForecast(models=optim_models, freq=freq)
 
-    complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set, out_set)
+    complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set_all, out_set)
 
     nf_outer_setup = {
         'df': complete_df, 'val_size': horizon,

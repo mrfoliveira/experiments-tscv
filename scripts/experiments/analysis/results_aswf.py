@@ -35,8 +35,8 @@ for ds in dataset_names:
     else:
         df, horizon, _, _, seas_len = ChronosDataset.load_everything(ds)
 
-    if ds == 'Weather':
-        seas_len = 30
+    if ds in ['Weather','TrafficL']:
+        seas_len = 1
 
     in_set, _ = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
     mase_sf = mase_scaling_factor(seasonality=seas_len, train_df=in_set)
@@ -142,13 +142,13 @@ cv_pivot = cv_df.reset_index().pivot(index='Dataset', columns='Method', values='
 cv_pivot_ext = cv_pivot.copy()
 cv_pivot_ext.loc['Avg. Rank'] = cv_pivot.rank(axis=1).mean()
 cv_pivot_ext.loc['Avg'] = cv_pivot.mean()
-cv_pivot_ext.loc['Top 2 Count'] = (cv_pivot.rank(axis=1) < 3).sum().astype(int)
+cv_pivot_ext.loc['Top 2 Count'] = (cv_pivot.rank(axis=1, method='min') < 3).sum().astype(int)
 
 cv_pivot_ext=cv_pivot_ext.rename(columns=METHOD_NAME_MAPPING, index=DATA_NAME_MAPPING)
 cv_pivot_ext.columns.name='Methods'
 cv_pivot_ext.index.name='Dataset'
 
-print(cv_pivot_ext)
+print(cv_pivot_ext.round(3))
 
 print(to_latex_tab(cv_pivot_ext, round_to_n=3,rotate_cols=False))
 

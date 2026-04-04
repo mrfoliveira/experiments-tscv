@@ -15,6 +15,7 @@ from src.config import STEP_SIZE
 
 
 def run_cross_validation(in_set: pd.DataFrame,
+                         in_set_all: pd.DataFrame,
                          out_set: pd.DataFrame,
                          cv_method: str,
                          nf_models: List,
@@ -80,7 +81,7 @@ def run_cross_validation(in_set: pd.DataFrame,
 
     optim_models = ModelsConfig.get_best_configs(cv_folds_config_scores)
 
-    complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set, out_set)
+    complete_df = DatasetLoader.concat_time_wise_tr_ts(in_set_all, out_set)
 
     nf_outer_setup = {
         'df': complete_df, 'val_size': horizon,
