@@ -67,6 +67,16 @@ class DatasetLoader:
         return df
 
     @staticmethod
+    def sample_uids(df: pd.DataFrame, frac_uid: float, id_col: str = 'unique_id'):
+
+        unique_ids = pd.Series(df[id_col].unique())
+        sampled_ids = unique_ids.sample(frac=frac_uid, random_state=123)
+
+        sampled_df = df[df['unique_id'].isin(sampled_ids)].reset_index(drop=True)
+
+        return sampled_df
+
+    @staticmethod
     def dummify_series(df, id_col: str = 'unique_id', target_col: str = 'y'):
         df_uid = df.copy().groupby(id_col)
 

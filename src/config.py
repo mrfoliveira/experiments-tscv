@@ -15,3 +15,5 @@ if DRY_RUN:
 else:
     N_SAMPLES = 10
     LIMIT_EPOCHS = False
+
+HOLDOUT_FOR_OUTSET = 0.2

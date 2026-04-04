@@ -7,7 +7,12 @@ from src.cv import CV_METHODS
 from src.cv.tw_holdout_doublesplit import time_wise_holdout
 from src.loaders import ChronosDataset, LongHorizonDatasetR
 from src.workflow_doublesplit import run_cross_validation
-from src.config import N_SAMPLES, SEED, LIMIT_EPOCHS, TRY_MPS, OUT_SET_MULTIPLIER
+from src.config import (N_SAMPLES,
+                        SEED,
+                        LIMIT_EPOCHS,
+                        TRY_MPS,
+                        OUT_SET_MULTIPLIER,
+                        HOLDOUT_FOR_OUTSET)
 
 warnings.filterwarnings('ignore')
 
@@ -22,13 +27,12 @@ target = 'TrafficL'
 # df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
 df, horizon, _, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
 
-
 # df['unique_id'].value_counts().value_counts().sort_index()
 # from pprint import pprint
 # dt = ChronosDataset.get_chronos_datasets_names()
 # pprint(dt)
 
-results_dir = Path('../../assets/results')
+RESULTS_PATH = '../../assets/results{}'
 # results_dir = Path('../assets/results')
 
 # - split dataset by time
@@ -36,6 +40,14 @@ results_dir = Path('../../assets/results')
 # ----- the data we use to get performance estimations
 # -- estimation_test is only used at the end to see how well our estimation worked
 in_set, out_set = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
+
+if HOLDOUT_FOR_OUTSET > 0:
+    path_ = RESULTS_PATH.format('_holdout')
+    in_set = ChronosDataset.sample_uids(in_set, 1 - HOLDOUT_FOR_OUTSET)
+else:
+    path_ = RESULTS_PATH.format('')
+
+results_dir = Path(path_)
 
 if __name__ == '__main__':
     print(results_dir.absolute())
