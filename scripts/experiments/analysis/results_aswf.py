@@ -13,6 +13,7 @@ from src.utils import (rename_uids,
                        METHOD_NAME_MAPPING,
                        DATA_NAME_MAPPING)
 
+# RESULTS_DIR = "assets/results_holdout"
 RESULTS_DIR = "assets/results"
 
 dataset_names = set(f.split(',')[0] for f in os.listdir(RESULTS_DIR))
