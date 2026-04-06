@@ -15,6 +15,7 @@ from src.utils import (rename_uids,
 from src.config import OUT_SET_MULTIPLIER
 
 RESULTS_DIR = "assets/results"
+# RESULTS_DIR = "assets/results_holdout"
 
 dataset_names = set(f.split(',')[0] for f in os.listdir(RESULTS_DIR))
 

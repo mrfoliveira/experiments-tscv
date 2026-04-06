@@ -41,7 +41,7 @@ if HOLDOUT_FOR_OUTSET > 0:
     path_ = RESULTS_PATH.format('_holdout')
     in_set = ChronosDataset.sample_uids(in_set_all, 1 - HOLDOUT_FOR_OUTSET)
 else:
-    path_ = RESULTS_PATH.format('')
+    path_ = RESULTS_PATH.format('_2')
     in_set = in_set_all.copy()
 
 results_dir = Path(path_)
