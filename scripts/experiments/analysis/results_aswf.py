@@ -14,7 +14,7 @@ from src.utils import (rename_uids,
                        DATA_NAME_MAPPING)
 
 # RESULTS_DIR = "assets/results_holdout"
-RESULTS_DIR = "assets/results_2"
+RESULTS_DIR = "assets/results"
 
 dataset_names = set(f.split(',')[0] for f in os.listdir(RESULTS_DIR))
 
@@ -27,11 +27,6 @@ cv_scores = []
 for ds in dataset_names:
     print(ds)
     # if ds not in ['TrafficL']:
-    #     continue
-    # if ds in ['monash_tourism_quarterly','monash_tourism_monthly']:
-    #     continue
-
-    # if ds in ['monash_tourism_quarterly']:
     #     continue
 
     if ds in [*LongHorizonDatasetR.FREQUENCY_MAP]:
