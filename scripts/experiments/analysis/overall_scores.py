@@ -25,8 +25,6 @@ MODELS = ["KAN", 'PatchTST', 'NBEATS', 'TFT',
           "SeasonalNaive"]
 FOLD_BASED_ERROR = False
 
-# todo não devia calcular o inner mase com in_in_set?
-
 cv_scores = []
 for ds in dataset_names:
     print(ds)
@@ -42,7 +40,9 @@ for ds in dataset_names:
         seas_len = 30
 
     in_set, _ = ChronosDataset.time_wise_split(df, horizon * OUT_SET_MULTIPLIER)
+    dev_set, _ = ChronosDataset.time_wise_split(in_set, horizon)
     mase_sf = mase_scaling_factor(seasonality=seas_len, train_df=in_set)
+    inner_mase_sf = mase_scaling_factor(seasonality=seas_len, train_df=dev_set)
 
     cv_methods = [*CV_METHODS] + ['TimeHoldout']
 
@@ -94,7 +94,8 @@ for ds in dataset_names:
 
                 f_err_inner_uids = fold_radar_inner.evaluate(keep_uids=True)
                 f_err_inner_uids = rename_uids(f_err_inner_uids)
-                f_err_inner = f_err_inner_uids.div(mase_sf, axis=0).mean()
+                # f_err_inner = f_err_inner_uids.div(mase_sf, axis=0).mean()
+                f_err_inner = f_err_inner_uids.div(inner_mase_sf, axis=0).mean()
                 f_err_inner = f_err_inner.drop('SeasonalNaive')
                 folds_res.append(f_err_inner)
 
@@ -112,7 +113,8 @@ for ds in dataset_names:
             # err_inner /= mase_sf.mean()
             err_inner_uids = radar_inner.evaluate(keep_uids=True)
             err_inner_uids = rename_uids(err_inner_uids)
-            err_inner = err_inner_uids.div(mase_sf.loc[err_inner_uids.index], axis=0).mean()
+            # err_inner = err_inner_uids.div(mase_sf.loc[err_inner_uids.index], axis=0).mean()
+            err_inner = err_inner_uids.div(inner_mase_sf.loc[err_inner_uids.index], axis=0).mean()
             err_inner = err_inner.drop('SeasonalNaive')
 
         selected_model = err_inner.idxmin()
@@ -131,7 +133,7 @@ for ds in dataset_names:
             {
                 'Dataset': ds,
                 'Method': method,
-                'MAE': mae_all,
+                'MAPEE': mae_all,
                 # 'me_all': me_all,
                 # 'perc_under': perc_under,
                 # 'mae_best': mae_best,
