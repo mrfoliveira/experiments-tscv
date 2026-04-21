@@ -1,5 +1,6 @@
 import os
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from modelradar.evaluate.radar import ModelRadar
 
@@ -13,7 +14,6 @@ from src.utils import (rename_uids,
                        METHOD_NAME_MAPPING,
                        DATA_NAME_MAPPING)
 
-# RESULTS_DIR = "assets/results_holdout"
 RESULTS_DIR = "assets/results"
 
 dataset_names = set(f.split(',')[0] for f in os.listdir(RESULTS_DIR))
@@ -26,9 +26,6 @@ MODELS = ["KAN", 'PatchTST', 'NBEATS', 'TFT',
 cv_scores = []
 for ds in dataset_names:
     print(ds)
-    # if ds not in ['TrafficL']:
-    #     continue
-
     if ds in [*LongHorizonDatasetR.FREQUENCY_MAP]:
         df, horizon, _, _, seas_len = LongHorizonDatasetR.load_everything(ds)
     else:
@@ -44,8 +41,6 @@ for ds in dataset_names:
     cv_methods = [*CV_METHODS] + ['TimeHoldout']
 
     for method in cv_methods:
-        # if method in ["KFold",'RepeatedKFold']:
-        #     continue
         inner_path = os.path.join(RESULTS_DIR, f"{ds},{method},inner.csv")
         outer_path = os.path.join(RESULTS_DIR, f"{ds},{method},outer.csv")
 
@@ -70,8 +65,6 @@ for ds in dataset_names:
             ratios_reference="SeasonalNaive",
         )
 
-        # err_outer = radar_outer.evaluate(keep_uids=False)
-        # err_outer /= mase_sf.mean()
         err_outer_uids = radar_outer.evaluate(keep_uids=True)
         err_outer = err_outer_uids.div(mase_sf, axis=0).mean()
         err_outer = err_outer.drop('SeasonalNaive')
@@ -114,9 +107,9 @@ for ds in dataset_names:
         selected_model = err_inner.idxmin()
         best_model = err_outer.idxmin()
 
-        if pd.isna(selected_model):
-            selected_model = 'MLP'
-            best_model = 'MLP'
+        # if pd.isna(selected_model):
+        #     selected_model = 'MLP'
+        #     best_model = 'MLP'
 
         scr = {
             'Method': method,
@@ -143,17 +136,24 @@ cv_pivot_ext.loc['Avg. Rank'] = cv_pivot.rank(axis=1).mean()
 cv_pivot_ext.loc['Avg'] = cv_pivot.mean()
 cv_pivot_ext.loc['Top 2 Count'] = (cv_pivot.rank(axis=1, method='min') < 3).sum().astype(int)
 
-cv_pivot_ext=cv_pivot_ext.rename(columns=METHOD_NAME_MAPPING, index=DATA_NAME_MAPPING)
-cv_pivot_ext.columns.name='Methods'
-cv_pivot_ext.index.name='Dataset'
+cv_pivot_ext = cv_pivot_ext.rename(columns=METHOD_NAME_MAPPING, index=DATA_NAME_MAPPING)
+cv_pivot_ext.columns.name = 'Methods'
+cv_pivot_ext.index.name = 'Dataset'
 
 print(cv_pivot_ext.round(3))
+print(to_latex_tab(cv_pivot_ext, round_to_n=3, rotate_cols=False))
 
-print(to_latex_tab(cv_pivot_ext, round_to_n=3,rotate_cols=False))
+avg_rank = cv_pivot_ext.loc['Avg. Rank'].sort_values()
+fig, ax = plt.subplots(figsize=(9, 4.5))
+avg_rank.plot(kind='bar', ax=ax, color='steelblue', edgecolor='black')
+ax.set_title('Average Rank by CV Method')
+ax.set_xlabel('Methods')
+ax.set_ylabel('Avg. Rank')
+ax.grid(axis='y', linestyle='--', alpha=0.4)
+ax.set_axisbelow(True)
+plt.xticks(rotation=30, ha='right')
+plt.tight_layout()
 
-#
-# print(cv_pivot_ext.round(3))
-# print(cv_pivot_ext.round(3).astype(str).to_latex(caption='xxxx', label='tab:2'))
-#
-# print(cv_df.groupby('Method').mean(numeric_only=True))
-# print(cv_df.groupby('Method').mean(numeric_only=True).to_latex(caption='xxxx', label='tab:2'))
+out_png = os.path.join("assets", "avg_rank_barplot.png")
+fig.savefig(out_png, format='png', dpi=300, bbox_inches='tight')
+plt.close(fig)

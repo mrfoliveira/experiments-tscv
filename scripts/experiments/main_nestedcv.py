@@ -23,13 +23,7 @@ target = 'monash_m3_monthly'
 df, horizon, _, freq, seas_len = ChronosDataset.load_everything(target)
 # df, horizon, _, freq, seas_len = LongHorizonDatasetR.load_everything(target, resample_to='D')
 
-# df['unique_id'].value_counts().value_counts().sort_index()
-# from pprint import pprint
-# dt = ChronosDataset.get_chronos_datasets_names()
-# pprint(dt)
-
 RESULTS_PATH = '../../assets/results{}'
-# results_dir = Path('../assets/results')
 
 # - split dataset by time
 # -- estimation_train is used for inner cv and final training
@@ -41,7 +35,7 @@ if HOLDOUT_FOR_OUTSET > 0:
     path_ = RESULTS_PATH.format('_holdout')
     in_set = ChronosDataset.sample_uids(in_set_all, 1 - HOLDOUT_FOR_OUTSET)
 else:
-    path_ = RESULTS_PATH.format('_2')
+    path_ = RESULTS_PATH.format('')
     in_set = in_set_all.copy()
 
 results_dir = Path(path_)

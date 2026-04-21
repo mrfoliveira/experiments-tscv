@@ -9,7 +9,7 @@ import numpy as np
 
 from utilsforecast.losses import mae
 from modelradar.evaluate.radar import ModelRadar
-from src.chronos_data import ChronosDataset
+from src.loaders import ChronosDataset
 
 from src.cv import CV_METHODS
 from src.mase import mase_scaling_factor

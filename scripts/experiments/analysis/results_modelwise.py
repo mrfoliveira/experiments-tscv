@@ -7,7 +7,7 @@ import pandas as pd
 from modelradar.evaluate.radar import ModelRadar
 
 from utilsforecast.losses import mae
-from src.chronos_data import ChronosDataset
+from src.loaders import ChronosDataset
 from src.mase import mase_scaling_factor
 from src.config import OUT_SET_MULTIPLIER
 from src.cv import CV_METHODS
