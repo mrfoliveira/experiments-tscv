@@ -20,13 +20,6 @@ def mase_scaling_factor(
 ) -> DFType:
     """Mean Absolute Scaled Error (MASE)
 
-    MASE measures the relative prediction
-    accuracy of a forecasting method by comparing the mean absolute errors
-    of the prediction and the observed value against the mean
-    absolute errors of the seasonal naive model.
-    The MASE partially composed the Overall Weighted Average (OWA),
-    used in the M4 Competition.
-
     Parameters
     ----------
     seasonality : int

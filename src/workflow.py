@@ -8,7 +8,7 @@ from statsforecast import StatsForecast
 from statsforecast.models import SeasonalNaive
 
 from src.cv import CV_METHODS, CV_METHODS_PARAMS
-from src.neuralforecast_ext import NeuralForecast2
+from src.neuralforecast_ext import CustomNeuralForecast
 from src.neuralnets import BaseModelsConfig
 from src.loaders.base import DatasetLoader
 from src.config import STEP_SIZE
@@ -47,7 +47,7 @@ def run_cross_validation(in_set: pd.DataFrame,
         }
 
         models_ = copy.deepcopy(nf_models)
-        nf = NeuralForecast2(models=models_, freq=freq, train_uids=train_uids)
+        nf = CustomNeuralForecast(models=models_, freq=freq, train_uids=train_uids)
         np.random.seed(random_state)
         cv_nf = nf.cross_validation(**nf_inner_setup)
 

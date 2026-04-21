@@ -12,7 +12,7 @@ from neuralforecast import NeuralForecast
 from neuralforecast.losses.pytorch import IQLoss, HuberIQLoss
 
 
-class NeuralForecast2(NeuralForecast):
+class CustomNeuralForecast(NeuralForecast):
     # A version of NeuralForecast where models are fit on a subset of df
     # that contains only the unique_ids from train_uids
     # testing uids are controlled outside this pipeline

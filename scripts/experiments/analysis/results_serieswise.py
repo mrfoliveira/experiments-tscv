@@ -16,7 +16,7 @@ from src.mase import mase_scaling_factor
 from src.utils import rename_uids
 from src.config import OUT_SET_MULTIPLIER
 
-RESULTS_DIR = "assets/results2"
+RESULTS_DIR = "assets/results"
 
 MODELS = ["KAN", 'PatchTST', 'NBEATS', 'TFT',
           'TiDE', 'NLinear', "MLP",

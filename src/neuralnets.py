@@ -1,14 +1,9 @@
 from pprint import pprint
-from typing import Optional, List, Union
-import hashlib
-import json
+from typing import Optional, List
 
-import numpy as np
 import pandas as pd
 from utilsforecast.evaluation import evaluate
 from utilsforecast.losses import mae
-from neuralforecast import NeuralForecast
-from neuralforecast.losses.pytorch import MAE
 from neuralforecast.auto import (AutoNBEATS,
                                  AutoTiDE,
                                  AutoNLinear,
@@ -84,14 +79,6 @@ class BaseModelsConfig:
                                   limit_epochs: bool = False,
                                   limit_val_batches: Optional[int] = None):
         """
-
-        :param horizon:
-        :param input_size:
-        :param n_samples:
-        :param try_mps:
-        :param limit_epochs:
-        :param limit_val_batches:
-        :return:
 
         example:
 
