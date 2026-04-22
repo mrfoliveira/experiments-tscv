@@ -58,7 +58,6 @@ def run_cross_validation(in_set: pd.DataFrame,
         cv = cv_nf.merge(cv_sf.drop(columns=['y']), on=['ds', 'unique_id', 'cutoff'])
         cv = cv[cv['unique_id'].isin(test_uids)]
 
-        # assuming we're aggregating by series, not by fold. we can test this later
         cv['fold'] = j
 
         cv_results.append(cv)

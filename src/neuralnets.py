@@ -40,12 +40,6 @@ class BaseModelsConfig:
         'AutoNHITS': AutoNHITS,
         'AutoDeepNPTS': AutoDeepNPTS,
         'AutoPatchTST': AutoPatchTST,
-
-        # 'AutoGRU': AutoGRU,
-        # 'AutoDeepAR': AutoDeepAR,
-        # 'AutoLSTM': AutoLSTM,
-        # 'AutoDilatedRNN': AutoDilatedRNN,
-        # 'AutoTCN': AutoTCN,
     }
 
     MODEL_CLASSES = {
@@ -102,6 +96,7 @@ class BaseModelsConfig:
                 mod.default_config['accelerator'] = 'cpu'
 
             if limit_epochs:
+                # for basic tests
                 mod.default_config['max_steps'] = 2
 
             if limit_val_batches is not None:
@@ -120,7 +115,6 @@ class BaseModelsConfig:
                     conf_['input_size'] = input_size
 
                     if 'input_size_multiplier' in conf_.keys():
-                        # conf_['input_size'] = conf_['input_size_multiplier'] * input_size
                         conf_['input_size'] = 1 * input_size
                         conf_.pop('input_size_multiplier')
 
@@ -134,14 +128,6 @@ class BaseModelsConfig:
                     alias=f'{mod_name_}_{i}'
                 )
 
-                # model_instance = mod(
-                #     h=horizon,
-                #     num_samples=n_samples,
-                #     alias=mod_name,
-                #     valid_loss=MAE(),
-                #     refit_with_val=True,
-                # )
-
                 models.append(model_inst)
 
         return models
@@ -149,7 +135,6 @@ class BaseModelsConfig:
     @classmethod
     def sample_configs(cls, model_name: str, horizon: int, n_samples: int = 10, config: Optional[None] = None):
         # BaseModelsConfig.sample_configs('AutoTFT', horizon=2, n_samples=5)
-
         if config is None:
             config_pool = cls.AUTO_MODEL_CLASSES.get(model_name).get_default_config(h=horizon, backend='ray')
         else:

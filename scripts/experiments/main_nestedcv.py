@@ -4,7 +4,7 @@ from pathlib import Path
 
 from src.neuralnets_auto import ModelsConfig
 from src.cv import CV_METHODS
-from src.cv.tw_holdout_doublesplit import time_wise_holdout
+from src.cv.tw_holdout_nested import time_wise_holdout
 from src.loaders import ChronosDataset, LongHorizonDatasetR
 from src.workflow_nestedcv import run_cross_validation
 from src.config import (N_SAMPLES,
