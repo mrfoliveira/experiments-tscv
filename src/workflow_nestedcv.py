@@ -60,7 +60,6 @@ def run_cross_validation(in_set: pd.DataFrame,
         config_scores = ModelsConfig.get_all_config_results(nf)
         cv_folds_config_scores.append(config_scores)
 
-        # assuming we're aggregating by series, not by fold. we can test this later
         cv['fold'] = j
 
         cv_results.append(cv)

@@ -6,21 +6,16 @@ import numpy as np
 import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.losses.pytorch import MAE
-from neuralforecast.auto import (AutoGRU,
-                                 AutoNBEATS,
+from neuralforecast.auto import (AutoNBEATS,
                                  AutoTiDE,
                                  AutoNLinear,
                                  AutoKAN,
                                  AutoMLP,
-                                 AutoLSTM,
                                  AutoDLinear,
                                  AutoNHITS,
                                  AutoPatchTST,
                                  AutoTFT,
-                                 AutoDeepNPTS,
-                                 AutoDeepAR,
-                                 AutoTCN,
-                                 AutoDilatedRNN)
+                                 AutoDeepNPTS)
 
 from neuralforecast.models import (GRU,
                                    KAN,
@@ -30,7 +25,7 @@ from neuralforecast.models import (GRU,
                                    MLP,
                                    LSTM,
                                    DLinear,
-                                   NHITS, DeepAR,
+                                   NHITS,
                                    PatchTST,
                                    TFT,
                                    DeepNPTS,
@@ -51,12 +46,6 @@ class ModelsConfig:
         'AutoNHITS': AutoNHITS,
         'AutoDeepNPTS': AutoDeepNPTS,
         'AutoPatchTST': AutoPatchTST,
-
-        # 'AutoGRU': AutoGRU,
-        # 'AutoDeepAR': AutoDeepAR,
-        # 'AutoLSTM': AutoLSTM,
-        # 'AutoDilatedRNN': AutoDilatedRNN,
-        # 'AutoTCN': AutoTCN,
     }
 
     MODEL_CLASSES = {
@@ -79,7 +68,6 @@ class ModelsConfig:
 
     NEED_CPU = ['AutoGRU',
                 'AutoDeepNPTS',
-                #'AutoTFT',
                 'AutoPatchTST',
                 'AutoDeepAR',
                 'AutoLSTM',
