@@ -41,8 +41,9 @@ pip install -r requirements.txt
 
 ## Running the Benchmark
 
-1. Configure experiment settings (e.g. number of folds, training percentage, etc.) in `src/config.py`.
-2. Run nested CV experiments:
+1. Setup your `.env` file
+2. Configure experiment settings (e.g. number of folds, training percentage, etc.) in `src/config.py`.
+3. Run nested CV experiments:
 
 ```bash
 python scripts/experiments/main_nestedcv.py
