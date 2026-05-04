@@ -142,5 +142,5 @@ cv_df_summ["Avg. under-estimate"] = cv_df.groupby('Method')['MPEE'].apply(lambda
 # Average magnitude of over-estimation error
 cv_df_summ["Avg. over-estimate"] = cv_df.groupby('Method')['MPEE'].apply(lambda x: (x[x>0]).mean().round(3))
 cv_df_summ = cv_df_summ.rename(index=METHOD_NAME_MAPPING)
-print(cv_df_summ.drop("MPEE"))
+print(cv_df_summ.drop("MPEE", axis = 1))
 print(to_latex_tab(cv_df_summ.drop("MPEE", axis = 1).T, round_to_n=3, rotate_cols=False))
